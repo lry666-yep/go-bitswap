@@ -314,6 +314,7 @@ func (bs *Bitswap) GetBlock(parent context.Context, k cid.Cid) (blocks.Block, er
 // WantlistForPeer returns the currently understood list of blocks requested by an
 // given peer.
 func (bs *Bitswap) WantlistForPeer(p peer.ID) []cid.Cid {
+	fmt.Println("@lry_test bitswap.go WantlistForPeer")
 	var out []cid.Cid
 	for _, e := range bs.engine.WantlistForPeer(p) {
 		out = append(out, e.Cid)
@@ -577,6 +578,7 @@ func (bs *Bitswap) Close() error {
 // GetWantlist returns the current local wantlist (both want-blocks and
 // want-haves).
 func (bs *Bitswap) GetWantlist() []cid.Cid {
+	fmt.Println("@lry_test bitswap.go GetWantlist")
 	return bs.pm.CurrentWants()
 }
 
