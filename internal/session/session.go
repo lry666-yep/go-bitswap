@@ -2,7 +2,6 @@ package session
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	bsbpm "github.com/ipfs/go-bitswap/internal/blockpresencemanager"
@@ -229,7 +228,7 @@ func (s *Session) ReceiveFromWithGeo(from peer.ID, ks []cid.Cid, haves []cid.Cid
 
 	// Inform the session want sender that a message has been received
 	// @lry 传入地理位置信息等
-	fmt.Println("@lry_debug in session.go ReceiveFromWithGeo")
+	// fmt.Println("@lry_debug in session.go ReceiveFromWithGeo")
 	s.sws.UpdateWithGeo(from, ks, haves, dontHaves, l, d)
 
 	if len(ks) == 0 {
@@ -480,6 +479,7 @@ func (s *Session) wantBlocks(ctx context.Context, newks []cid.Cid) {
 		// Tell the sessionWants tracker that that the wants have been requested
 		s.sw.BlocksRequested(newks)
 		// Tell the sessionWantSender that the blocks have been requested
+		// 向sws的change add want -> 发送want-have want-block信息
 		s.sws.Add(newks)
 	}
 
@@ -490,7 +490,7 @@ func (s *Session) wantBlocks(ctx context.Context, newks []cid.Cid) {
 	}
 
 	// No peers discovered yet, broadcast some want-haves
-	// 没有发现peer 光比want have
+	// session还没发现peer 进入peer 发现阶段 广播、查DHT
 	ks := s.sw.GetNextWants()
 	if len(ks) > 0 {
 		log.Infow("No peers - broadcasting", "session", s.id, "want-count", len(ks))

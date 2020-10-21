@@ -2,7 +2,6 @@ package sessionmanager
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -177,7 +176,7 @@ func (sm *SessionManager) ReceiveFrom(ctx context.Context, p peer.ID, blks []cid
 // @lry 重写ReceiveFrom函数 加入Location与distance
 func (sm *SessionManager) ReceiveFromWithGeo(ctx context.Context, p peer.ID, blks []cid.Cid, haves []cid.Cid, dontHaves []cid.Cid, l bsmsg.Location, d float64) {
 	// Record block presence for HAVE / DONT_HAVE
-	fmt.Println("@lry_debug in sessionmanager.go ReceiveFromWithGeo")
+	// fmt.Println("@lry_debug in sessionmanager.go ReceiveFromWithGeo")
 	sm.blockPresenceManager.ReceiveFrom(p, haves, dontHaves)
 
 	// Notify each session that is interested in the blocks / HAVEs / DONT_HAVEs

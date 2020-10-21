@@ -2,12 +2,12 @@
 package session
 
 import (
-	"fmt"
-
 	bsmsg "github.com/ipfs/go-bitswap/message"
 	"github.com/ipfs/go-bitswap/priority_queue"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 )
+
+// var log = logging.Logger("peergeotracker")
 
 // 地理位置距离层级划分
 const (
@@ -56,7 +56,7 @@ func (pgt *peerGeoTracker) setGeoInfo(from peer.ID, distance float64, lat float6
 // 在peers中选择最近区域的
 // 进一步在prt中选择发送block最多的
 func (pgt *peerGeoTracker) chooseNearestPeer(peers []peer.ID, prt *peerResponseTracker) peer.ID {
-	fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer \n")
+	// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer \n")
 	// 将peers 拆分到 peers_l1 peers_l2 peers_l3 中
 	var bestPeers []peer.ID
 	peers_l1 := priority_queue.New()
@@ -84,11 +84,13 @@ func (pgt *peerGeoTracker) chooseNearestPeer(peers []peer.ID, prt *peerResponseT
 			}
 		} else {
 			// 没有地理位置信息
-			fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer peer %s geoinfo not exist\n", p)
+			log.Debugw("@lry_debug in peergeotracker.go chooseNearestPeer peer ", p, "geoinfo not exist")
+			// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer peer %s geoinfo not exist\n", p)
 		}
 	}
 	if peers_l1.Len() > 0 {
-		fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 1 has %d peers \n", peers_l1.Len())
+		log.Debugw("@lry_debug in peergeotracker.go chooseNearestPeer Level 1 has ", peers_l1.Len(), " peers")
+		// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 1 has %d peers \n", peers_l1.Len())
 		for i := 0; i < min(peers_l1.Len(), 5); i++ {
 			x := peers_l1.Pop().(*GeoNode)
 			bestPeers = append(bestPeers, x.pid)
@@ -96,7 +98,8 @@ func (pgt *peerGeoTracker) chooseNearestPeer(peers []peer.ID, prt *peerResponseT
 		return prt.choose(bestPeers)
 	}
 	if peers_l2.Len() > 0 {
-		fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 2 has %d peers \n", peers_l2.Len())
+		log.Debugw("@lry_debug in peergeotracker.go chooseNearestPeer Level 2 has ", peers_l2.Len(), " peers")
+		// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 2 has %d peers \n", peers_l2.Len())
 		for i := 0; i < min(peers_l2.Len(), 5); i++ {
 			x := peers_l2.Pop().(*GeoNode)
 			bestPeers = append(bestPeers, x.pid)
@@ -104,7 +107,8 @@ func (pgt *peerGeoTracker) chooseNearestPeer(peers []peer.ID, prt *peerResponseT
 		return prt.choose(bestPeers)
 	}
 	if peers_l3.Len() > 0 {
-		fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 3 has %d peers \n", peers_l3.Len())
+		log.Debugw("@lry_debug in peergeotracker.go chooseNearestPeer Level 3 has ", peers_l3.Len(), " peers")
+		// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer Level 3 has %d peers \n", peers_l3.Len())
 		for i := 0; i < min(peers_l3.Len(), 5); i++ {
 			x := peers_l3.Pop().(*GeoNode)
 			bestPeers = append(bestPeers, x.pid)
@@ -112,8 +116,8 @@ func (pgt *peerGeoTracker) chooseNearestPeer(peers []peer.ID, prt *peerResponseT
 		return prt.choose(bestPeers)
 	}
 	// 如果所有节点都没有地理位置信息
-	fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer no peers has geoinfo \n")
-
+	// fmt.Printf("@lry_debug in peergeotracker.go chooseNearestPeer no peers has geoinfo \n")
+	log.Debugw("@lry_debug in peergeotracker.go chooseNearestPeer no peers has geoinfo")
 	return prt.choose(peers)
 
 }

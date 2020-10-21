@@ -191,7 +191,7 @@ func newEngine(ctx context.Context, bs bstore.Blockstore, peerTagger PeerTagger,
 	var location bsmsg.Location
 	location.Lat = y
 	location.Lng = x
-	fmt.Println("@lry_debug in engine.go newEngine New a Engine x: ", location.Lng, " location.Lng: ", location.Lat)
+	// fmt.Println("@lry_debug in engine.go newEngine New a Engine x: ", location.Lng, " location.Lng: ", location.Lat)
 
 	e := &Engine{
 		loc:                             location,
@@ -360,7 +360,7 @@ func (e *Engine) nextEnvelope(ctx context.Context) (*Envelope, error) {
 		location.Lat = e.loc.Lat
 		location.Lng = e.loc.Lng
 		msg.SetLocation(&location)
-		fmt.Println("@lry_debug msg location info lat=", msg.Location().Lat, " lng=", msg.Location().Lng)
+		// fmt.Println("@lry_debug msg location info lat=", msg.Location().Lat, " lng=", msg.Location().Lng)
 
 		log.Debugw("Bitswap process tasks", "local", e.self, "taskCount", len(nextTasks))
 

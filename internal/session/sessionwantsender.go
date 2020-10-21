@@ -181,7 +181,7 @@ func (sws *sessionWantSender) Update(from peer.ID, ks []cid.Cid, haves []cid.Cid
 		return
 	}
 	// 原始update
-	fmt.Println("@lry_origin: in origin sessionwantsender Update, should use UpdateWithGeo")
+	// fmt.Println("@lry_origin: in origin sessionwantsender Update, should use UpdateWithGeo")
 	sws.addChange(change{
 		update: update{from, ks, haves, dontHaves, bsmsg.Location{}, 0},
 	})
@@ -195,7 +195,8 @@ func (sws *sessionWantSender) UpdateWithGeo(from peer.ID, ks []cid.Cid, haves []
 		return
 	}
 	// update加入地理位置信息
-	fmt.Println("@lry_debug in sessionwantsender.go UpdateWithGeo")
+	// fmt.Println("@lry_debug in sessionwantsender.go UpdateWithGeo")
+	log.Debugw("@lry_debug in sessionwantsender.go UpdateWithGeo")
 	sws.addChange(change{
 		update: update{from, ks, haves, dontHaves, l, d},
 	})
@@ -279,7 +280,7 @@ func (sws *sessionWantSender) collectChanges(changes []change) []change {
 // onChange processes the next set of changes
 // 更新peer信息，发送next_want @@@
 func (sws *sessionWantSender) onChange(changes []change) {
-	fmt.Printf("@lry_debug in sessionwantsender.go onChange !!!!!!!!!!!!!!!!!, change number=%d \n", len(changes))
+	// fmt.Printf("@lry_debug in sessionwantsender.go onChange !!!!!!!!!!!!!!!!!, change number=%d \n", len(changes))
 	// Several changes may have been recorded since the last time we checked,
 	// so pop all outstanding changes from the channel
 	changes = sws.collectChanges(changes)
@@ -339,7 +340,7 @@ func (sws *sessionWantSender) onChange(changes []change) {
 	// 检查session中是否有peers 有的话发送下一步want信息
 	if sws.spm.HasPeers() {
 		// !!!!!!!!!!!!!发送want 信息到 peer
-		fmt.Printf("@lry_debug in sessionwantsender.go onChange in session has peers, send next wants \n")
+		// fmt.Printf("@lry_debug in sessionwantsender.go onChange in session has peers, send next wants \n")
 		sws.sendNextWants(newlyAvailable)
 	}
 }
@@ -461,7 +462,7 @@ func (sws *sessionWantSender) processUpdates(updates []update) []cid.Cid {
 
 			// Update the block presence for the peer
 			// 更新 block presence 作为选择依据
-			fmt.Printf("@lry_debug in sessionwantsender.go processUpdates dont_have c %s \n", c)
+			// fmt.Printf("@lry_debug in sessionwantsender.go processUpdates dont_have c %s \n", c)
 			sws.updateWantBlockPresence(c, upd.from)
 
 			// Check if the DONT_HAVE is in response to a want-block
@@ -479,14 +480,15 @@ func (sws *sessionWantSender) processUpdates(updates []update) []cid.Cid {
 	// Process received HAVEs
 	for _, upd := range updates {
 		// 记录节点的地理位置信息
-		fmt.Printf("@lry_debug in sessionwantsender.go processUpdates in have update process loc info p %s, distance=%f, lat=%f, lng=%f \n", upd.from, upd.distance, upd.loc.Lat, upd.loc.Lng)
+		// fmt.Printf("@lry_debug in sessionwantsender.go processUpdates in have update process loc info p %s, distance=%f, lat=%f, lng=%f \n", upd.from, upd.distance, upd.loc.Lat, upd.loc.Lng)
+		log.Debugw("@lry_debug in sessionwantsender.go processUpdates in have update process loc info p=", upd.from, " distance=", upd.distance, " lat=", upd.loc.Lat, " lng=", upd.loc.Lng)
 		sws.peerGeoTrkr.setGeoInfo(upd.from, upd.distance, upd.loc.Lat, upd.loc.Lng)
 		for _, c := range upd.haves {
 			// If we haven't already received a block for the want
 			if !blkCids.Has(c) {
 				// Update the block presence for the peer
 				// 更新 want info block presence 作为选择依据
-				fmt.Printf("@lry_debug in sessionwantsender.go processUpdates have c %s \n", c)
+				// fmt.Printf("@lry_debug in sessionwantsender.go processUpdates have c %s \n", c)
 				sws.updateWantBlockPresence(c, upd.from)
 			}
 
@@ -602,7 +604,8 @@ func (sws *sessionWantSender) sendNextWants(newlyAvailable []peer.ID) {
 		// We already sent a want-block to a peer and haven't yet received a
 		// response yet
 		if wi.sentTo != "" {
-			fmt.Printf("@lry_debug in sessionwantsender.go sendNextWant We already sent a want-block to a peer \n")
+			log.Debugw("@lry_debug in sessionwantsender.go sendNextWant We already sent a want-block c=", c, " to a peer=", wi.sentTo)
+			// fmt.Printf("@lry_debug in sessionwantsender.go sendNextWant We already sent a want-block to a peer \n")
 			continue
 		}
 
@@ -627,12 +630,12 @@ func (sws *sessionWantSender) sendNextWants(newlyAvailable []peer.ID) {
 				toSend.forPeer(op).wantHaves.Add(c)
 			}
 		}
+		log.Debugw("@lry_debug in sessionwantsender.go sendNextWants process c=", c, "send want_block to peer=", wi.bestPeer)
 		fmt.Printf("@lry_debug in sessionwantsender.go sendNextWants process c %s, send want_block to peer %s \n", c, wi.bestPeer)
 	}
 	//所有选中发送want-block的peer 其他所有发送want-have的peer
 	// Send any wants we've collected
 	sws.sendWants(toSend)
-	fmt.Println("`````````````````````````````")
 }
 
 // sendWants sends want-have and want-blocks to the appropriate peers
@@ -822,8 +825,8 @@ func (wi *wantInfo) calculateBestPeer() {
 	// blockPresence :Tracks HAVE / DONT_HAVE sent to us for the want by each peer
 	// wi.blockPresence: map[peer.ID]BlockPresence, BlockPresence->int
 	// 遍历所有回复的peer
-	fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer total peer count = %d \n", len(wi.blockPresence))
-
+	// fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer total peer count = %d \n", len(wi.blockPresence))
+	log.Debugw("@lry_debug in sessionwantsender.go calculateBestPeer total peer count = ", len(wi.blockPresence))
 	for p, bp := range wi.blockPresence {
 		if bp > bestBP {
 			bestBP = bp
@@ -834,7 +837,8 @@ func (wi *wantInfo) calculateBestPeer() {
 		}
 	}
 	wi.bestPeer = bestPeer
-	fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer best peer=%s, countWithBest=%d, bestBP=%d \n", bestPeer, countWithBest, bestBP)
+	// fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer best peer=%s, countWithBest=%d, bestBP=%d \n", bestPeer, countWithBest, bestBP)
+	log.Debugw("@lry_debug in sessionwantsender.go calculateBestPeer best peer=", bestPeer, "countWithBest=", countWithBest, "bestBP=", bestBP)
 	// If no peer has a block presence better than DONT_HAVE, bail out
 	if bestPeer == "" {
 		return
@@ -854,8 +858,9 @@ func (wi *wantInfo) calculateBestPeer() {
 		}
 	}
 	// 结合wi.peerGeoTrkr选择 先选地理位置最近的一些节点 多个再根据RspTrkr进行进一步选择
-	fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer choose peersCount=%d,\n", len(peersWithBest))
+	// fmt.Printf("@lry_debug in sessionwantsender.go calculateBestPeer choose peersCount=%d,\n", len(peersWithBest))
 	wi.bestPeer = wi.peerGeoTrkr.chooseNearestPeer(peersWithBest, wi.peerRspTrkr)
+	log.Debugw("@lry_debug in sessionwantsender.go calculateBestPeer finally choose best peer = ", wi.bestPeer, "peer distance =", wi.peerGeoTrkr.getGeoInfo(wi.bestPeer))
 	// wi.bestPeer = wi.peerRspTrkr.choose(peersWithBest)
 
 }

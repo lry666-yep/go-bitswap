@@ -229,7 +229,7 @@ func TestPendingBlockAdded(t *testing.T) {
 	bsMessage1.AddBlockPresence(ks[0], 0)
 	bsMessage1.SetLocation(&bsmsg.Location{10.55, 100.33})
 	unknownPeer1 := peer.ID("QmUHfvCQrzyR6vFXmeyCptfCWedfcmfa12V6UuziDtrw24")
-	fmt.Println("test")
+
 	instance.Exchange.ReceiveMessage(oneSecCtx, unknownPeer, bsMessage)
 	instance.Exchange.ReceiveMessage(oneSecCtx, unknownPeer1, bsMessage1)
 

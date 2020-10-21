@@ -3,6 +3,8 @@ package getter
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	notifications "github.com/ipfs/go-bitswap/internal/notifications"
 	logging "github.com/ipfs/go-log"
@@ -21,6 +23,7 @@ type GetBlocksFunc func(context.Context, []cid.Cid) (<-chan blocks.Block, error)
 // SyncGetBlock takes a block cid and an async function for getting several
 // blocks that returns a channel, and uses that function to return the
 // block syncronously.
+// GetBlock调用的，可以在这测量获取一个块的时间
 func SyncGetBlock(p context.Context, k cid.Cid, gb GetBlocksFunc) (blocks.Block, error) {
 	if !k.Defined() {
 		log.Error("undefined cid in GetBlock")
@@ -35,7 +38,7 @@ func SyncGetBlock(p context.Context, k cid.Cid, gb GetBlocksFunc) (blocks.Block,
 	// enforce. May this comment keep you safe.
 	ctx, cancel := context.WithCancel(p)
 	defer cancel()
-
+	currentTime := time.Now().UnixNano()
 	promise, err := gb(ctx, []cid.Cid{k})
 	if err != nil {
 		return nil, err
@@ -51,6 +54,8 @@ func SyncGetBlock(p context.Context, k cid.Cid, gb GetBlocksFunc) (blocks.Block,
 				return nil, errors.New("promise channel was closed")
 			}
 		}
+		recvTime := time.Now().UnixNano()
+		fmt.Printf("@lry_result ***** get cid=%s  , time=%d *******", k, recvTime-currentTime)
 		return block, nil
 	case <-p.Done():
 		return nil, p.Err()
@@ -82,6 +87,7 @@ func AsyncGetBlocks(ctx context.Context, sessctx context.Context, keys []cid.Cid
 	}
 
 	// Send the want request for the keys to the network
+	// 发送want信息
 	want(ctx, keys)
 
 	out := make(chan blocks.Block)

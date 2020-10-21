@@ -124,7 +124,7 @@ func New(parent context.Context, network bsnet.BitSwapNetwork,
 	var location bsmsg.Location
 	location.Lat = y
 	location.Lng = x
-	fmt.Println("@lry_debug in bitswap.go New New a BitSwapInstance lat: ", location.Lat, " lng: ", location.Lng)
+	fmt.Println("@lry_debug in bitswap.go New a BitSwapInstance lat: ", location.Lat, " lng: ", location.Lng)
 
 	ctx, cancelFunc := context.WithCancel(parent)
 	ctx = metrics.CtxSubScope(ctx, "bitswap")
@@ -175,7 +175,7 @@ func New(parent context.Context, network bsnet.BitSwapNetwork,
 		return bsspm.New(id, network.ConnectionManager())
 	}
 	notif := notifications.New()
-	//创建sessionManager  session管理计算最佳节点算法
+	//创建sessionManager
 	sm = bssm.New(ctx, sessionFactory, sim, sessionPeerManagerFactory, bpm, pm, notif, network.Self())
 	// 在engine中加入地理位置信息
 	engine := decision.NewEngine(ctx, bstore, network.ConnectionManager(), network.Self())
@@ -252,7 +252,7 @@ type Bitswap struct {
 	notif notifications.PubSub
 
 	// newBlocks is a channel for newly added blocks to be provided to the
-	// network.  blocks pushed down this channel get buffered and fed to the
+	// network.  blocks pushed down this channel get buffereGEtfdd and fed to the
 	// provideKeys channel later on to avoid too much network activity
 	newBlocks chan cid.Cid
 	// provideKeys directly feeds provide workers
@@ -314,7 +314,7 @@ func (bs *Bitswap) GetBlock(parent context.Context, k cid.Cid) (blocks.Block, er
 // WantlistForPeer returns the currently understood list of blocks requested by an
 // given peer.
 func (bs *Bitswap) WantlistForPeer(p peer.ID) []cid.Cid {
-	fmt.Println("@lry_test bitswap.go WantlistForPeer")
+	// fmt.Println("@lry_test bitswap.go WantlistForPeer")
 	var out []cid.Cid
 	for _, e := range bs.engine.WantlistForPeer(p) {
 		out = append(out, e.Cid)
@@ -404,7 +404,7 @@ func (bs *Bitswap) receiveBlocksFrom(ctx context.Context, from peer.ID, blks []b
 	// 将have donthave blk信息传入session 做请求判断
 	// 在这传进去geo信息, 在session中记录，并在决策中使用  在这传入RTT信息 在决策中使用
 	// @lry 改成ReceiveFromWithGeo
-	fmt.Println("@@lry_debug in bitswap.go receiveBlocksFrom")
+	// fmt.Println("@lry_debug in bitswap.go receiveBlocksFrom")
 	bs.sm.ReceiveFromWithGeo(ctx, from, allKs, haves, dontHaves, l, d)
 	// bs.sm.ReceiveFrom(ctx, from, allKs, haves, dontHaves)
 
@@ -457,7 +457,7 @@ func (bs *Bitswap) ReceiveMessage(ctx context.Context, p peer.ID, incoming bsmsg
 	// 计算peer与本节点距离 保存
 	distance := geo.Get_distance(bs.loc.Lng, bs.loc.Lat, location.Lng, location.Lat)
 
-	fmt.Printf("@lry_debug in bitswap.go ReceiveMessage Receive have etc from peer %s location lat=%f lng=%f distance=%f \n", p, location.Lat, location.Lng, distance)
+	// fmt.Printf("@lry_debug in bitswap.go ReceiveMessage Receive have etc from peer %s location lat=%f lng=%f distance=%f \n", p, location.Lat, location.Lng, distance)
 
 	bs.engine.MessageReceived(ctx, p, incoming)
 	// TODO: this is bad, and could be easily abused.
@@ -477,16 +477,14 @@ func (bs *Bitswap) ReceiveMessage(ctx context.Context, p peer.ID, incoming bsmsg
 	}
 
 	// 接收 have dont_have信息
-	// geo := incoming.Geos();
-	// 提取incoming中的发送时间戳 用当前时间减
-	// RTT := now - incoming.sendTime();
 	haves := incoming.Haves()
 	dontHaves := incoming.DontHaves()
 	// location distance
 	if len(iblocks) > 0 || len(haves) > 0 || len(dontHaves) > 0 {
 		// Process blocks
 		// @lry 加上地理位置信息
-		fmt.Println("@lry_debug in bitswap.go ReceiveMessage use receiveBlocksFrom")
+		// fmt.Println("@lry_debug in bitswap.go ReceiveMessage use receiveBlocksFrom")
+		log.Debugw("@lry_debug in bitswap.go ReceiveMessage use receiveBlocksFrom")
 		err := bs.receiveBlocksFrom(ctx, p, iblocks, haves, dontHaves, location, distance)
 		if err != nil {
 			log.Warnf("ReceiveMessage recvBlockFrom error: %s", err)
@@ -578,7 +576,7 @@ func (bs *Bitswap) Close() error {
 // GetWantlist returns the current local wantlist (both want-blocks and
 // want-haves).
 func (bs *Bitswap) GetWantlist() []cid.Cid {
-	fmt.Println("@lry_test bitswap.go GetWantlist")
+	// fmt.Println("@lry_test bitswap.go GetWantlist")
 	return bs.pm.CurrentWants()
 }
 

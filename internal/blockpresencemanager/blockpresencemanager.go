@@ -1,7 +1,6 @@
 package blockpresencemanager
 
 import (
-	"fmt"
 	"sync"
 
 	cid "github.com/ipfs/go-cid"
@@ -24,7 +23,7 @@ func New() *BlockPresenceManager {
 // ReceiveFrom is called when a peer sends us information about which blocks
 // it has and does not have
 func (bpm *BlockPresenceManager) ReceiveFrom(p peer.ID, haves []cid.Cid, dontHaves []cid.Cid) {
-	fmt.Printf("@lry_debug in blockpresencemanager.go ReceiveFrom p=%s, havelen=%d, donthavelen=%d \n", p, len(haves), len(dontHaves))
+	// fmt.Printf("@lry_debug in blockpresencemanager.go ReceiveFrom p=%s, havelen=%d, donthavelen=%d \n", p, len(haves), len(dontHaves))
 	bpm.Lock()
 	defer bpm.Unlock()
 
@@ -37,7 +36,7 @@ func (bpm *BlockPresenceManager) ReceiveFrom(p peer.ID, haves []cid.Cid, dontHav
 }
 
 func (bpm *BlockPresenceManager) updateBlockPresence(p peer.ID, c cid.Cid, present bool) {
-	fmt.Printf("@lry_debug in blockpresencemanager.go updateBlockPresence p=%s, c=%s \n", p, c)
+	// fmt.Printf("@lry_debug in blockpresencemanager.go updateBlockPresence p=%s, c=%s \n", p, c)
 	_, ok := bpm.presence[c]
 	if !ok {
 		bpm.presence[c] = make(map[peer.ID]bool)
