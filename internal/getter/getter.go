@@ -55,7 +55,7 @@ func SyncGetBlock(p context.Context, k cid.Cid, gb GetBlocksFunc) (blocks.Block,
 			}
 		}
 		recvTime := time.Now().UnixNano()
-		fmt.Printf("@lry_result ***** get cid=%s  , time=%d *******", k, recvTime-currentTime)
+		fmt.Printf("*** @lry_result get cid=%s, time=%d ms *** \n", k, (recvTime-currentTime)/int64(time.Millisecond))
 		return block, nil
 	case <-p.Done():
 		return nil, p.Err()
